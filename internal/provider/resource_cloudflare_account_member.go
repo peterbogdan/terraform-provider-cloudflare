@@ -87,6 +87,13 @@ func resourceCloudflareAccountMemberCreate(ctx context.Context, d *schema.Resour
 	memberEmailAddress := d.Get("email_address").(string)
 	requestedMemberRoles := d.Get("role_ids").(*schema.Set).List()
 
+	var memberStatus string
+	if d.Get("status").(string) != "" {
+		memberStatus = d.Get("status").(string)
+	} else {
+		memberStatus = "pending"
+	}
+
 	client := meta.(*cloudflare.API)
 
 	var accountMemberRoleIDs []string
@@ -101,7 +108,7 @@ func resourceCloudflareAccountMemberCreate(ctx context.Context, d *schema.Resour
 		accountID = client.AccountID
 	}
 
-	r, err := client.CreateAccountMember(ctx, accountID, memberEmailAddress, accountMemberRoleIDs)
+	r, err := client.CreateAccountMember(ctx, accountID, memberEmailAddress, accountMemberRoleIDs, memberStatus)
 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating Cloudflare account member: %w", err))
@@ -170,6 +177,7 @@ func resourceCloudflareAccountMemberImport(ctx context.Context, d *schema.Resour
 
 	d.Set("account_id", accountID)
 	d.Set("email_address", member.User.Email)
+	d.Set("status", member.status)
 	d.Set("role_ids", memberIDs)
 	d.SetId(accountMemberID)
 

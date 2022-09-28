@@ -16,6 +16,13 @@ func resourceCloudflareAccountMemberSchema() map[string]*schema.Schema {
 			Description: "The email address of the user who you wish to manage. Following creation, this field becomes read only via the API and cannot be updated.",
 		},
 
+		"status": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			ValidateFunc: validation.StringInSlice([]string{"accepted", "pending"}, false),
+			Description: "A member's status in the account.",
+		},
+
 		"role_ids": {
 			Type:        schema.TypeSet,
 			Required:    true,
